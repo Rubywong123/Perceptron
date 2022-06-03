@@ -1,0 +1,150 @@
+import nltk
+from nltk.parse.stanford import StanfordDependencyParser
+from nltk.stem import WordNetLemmatizer
+import numpy as np
+
+
+
+'''return a string of pos tags of their corresponding words. Containing punctuations.'''
+def get_pos(tokens):
+    pos_tag = nltk.pos_tag(tokens)
+    result = []
+    for word, pos in pos_tag:
+        result.append(pos)
+    return result
+
+
+'''
+NER
+return: a tree stands for NER labels.
+
+for word in ners:
+    if type(word) == nltk.tree.Tree:
+        [further operations]
+'''
+def get_ner(tokens):
+    nltk.download('maxent_ne_chunker')
+    tags = nltk.pos_tag(tokens)
+    ners = nltk.ne_chunk(tags)
+
+    return ners
+
+'''
+dependency parsing
+
+return: list of dependencies(in the form of tuples)
+[((word1, pos1), relation, (word2, pos2)), ...]
+[head, relation, dependent]
+
+'''
+
+
+def get_dep(sentence):
+    '''Warning! 2 parser models are needed to be downloaded and put in the path.'''
+    path_to_jar = 'parser/stanford-parser.jar'
+    path_to_models_jar = 'parser/stanford-parser-4.2.0-models.jar'
+    parser = StanfordDependencyParser(path_to_jar=path_to_jar, path_to_models_jar=path_to_models_jar)
+
+    result = parser.raw_parse(sentence)
+    dep = next(result)
+    return list(dep.triples())
+
+
+'''generate feature matrix'''
+
+
+'''4 ugram features
+1) word unigram, aims at using tokens that are highly related to being triggers.
+2) dependency parser, the head of a dependency tree tends to be a trigger.
+
+
+return: (L, 4) matrix
+'''
+def get_ugram_features(tokens):
+    num_features = 5
+    num_classes = 2
+    ugram_features = np.zeros((len(tokens), num_classes, num_features))
+    ### load lists of triggers with very high/ high/ medium frequency.
+    with open('very_high.txt', 'r') as f:
+        very_high = f.read().splitlines()
+    with open('high.txt', 'r') as f:
+        high = f.read().splitlines()
+    with open('medium.txt', 'r') as f:
+        medium = f.read().splitlines()
+    lemmatizer = WordNetLemmatizer()
+    sentence = ' '.join(tokens)
+    dep = get_dep(sentence)
+
+    #generate features
+    pos = ['n', 'v', 'r', 'a']
+    token2index = {}
+    for i, token in enumerate(tokens):
+        token2index[token] = i
+        for p in pos:
+            lemma = lemmatizer.lemmatize(token, pos = p)
+            if lemma in very_high:
+                ugram_features[i, 0, 0] = 1
+                ugram_features[i, 1, 0] = 1
+                break
+            elif lemma in high:
+                ugram_features[i, 0, 1] = 1
+                ugram_features[i, 1, 1] = 1
+                break
+            elif lemma in medium:
+                ugram_features[i, 0, 2] = 1
+                ugram_features[i, 1, 2] = 1
+                break
+    
+    #dependency head
+    head_set = set()
+    dep_set = set()
+    for edge in dep:
+        word = edge[0][0]
+        dependent = edge[2][0]
+        head_set.add(word)
+        dep_set.add(dependent)
+    for dep in dep_set:
+        if dep in head_set:
+            head_set.remove(dep)
+    for word in head_set:
+        if word in token2index:
+            ugram_features[token2index[word]][0][3] = 1
+            ugram_features[token2index[word]][1][3] = 1
+    for word in dep_set:
+        if word in token2index:
+            ugram_features[token2index[word]][0][4] = 1
+            ugram_features[token2index[word]][1][4] = 1
+    
+    #return np.concatenate([ugram_features[:,:,0], ugram_features[:,:,1]], axis=1)
+    return ugram_features
+
+'''bigram features
+1) 
+
+'''
+def get_bigram_features(tokens, triggers):
+    pass
+
+
+'''
+return (L, n_classes * features_per_label) matrix
+'''
+def generate_feature_matrix(tokens):
+    ugram_features = get_ugram_features(tokens)
+    '''bigram features
+    
+    '''
+
+    '''np.concatenate((ugram_features, bigram_features), axis = 1)'''
+    features = ugram_features
+
+    return features
+
+
+
+if __name__ == '__main__':
+    tokens = ['I', 'have', 'attended', 'a', 'war']
+    triggers = [0, 1, 0, 0, 1]
+    features = generate_feature_matrix(tokens)
+
+    print(features)
