@@ -74,6 +74,34 @@ def prob_split(data):
             f.write(word)
             f.write('\n')
 
+def pair_split(train_data):
+    pair_set = set()
+    for i in train_data:
+        temp = i[i['triggers'] == 1]
+        # find all the adjacent triggers
+        for idx in temp.index:
+            if idx+1 in temp.index:
+                if (i.iloc[idx, 0], i.iloc[idx+1, 0]) in pair_set:
+                    continue
+                pair_set.add((i.iloc[idx, 0], i.iloc[idx+1, 0]))
+    good_pair = []
+    for p in pair_set:
+        phrase = p.split()
+        t_cnt = 0
+        tot_cnt = 0
+        for index, i in enumerate(train_data):
+            for idx in i.index:
+                if idx +1 in i.index and i.iloc[idx, 0] == phrase[0] and i.iloc[idx+1, 0] == phrase[1]:
+                    #check trigger
+                    tot_cnt += 1
+                    if i.iloc[idx, 1] == 1 and i.iloc[idx, 1] == 1:
+                        t_cnt += 1
+        if t_cnt / tot_cnt > 0.7:
+            good_pair.append(p)
+    with open('good_pair.txt', 'w') as f:
+        for p in good_pair:
+            f.write(p+'\n')
+
 
 
 

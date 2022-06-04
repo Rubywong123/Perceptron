@@ -66,7 +66,7 @@ def get_dep(sentence):
 return: (L, 4) matrix
 '''
 def get_ugram_features(tokens):
-    num_features = 9
+    num_features = 4
     num_classes = 2
     ugram_features = np.zeros((len(tokens), num_classes, num_features))
     ### load lists of triggers with very high/ high/ medium frequency.
@@ -76,9 +76,11 @@ def get_ugram_features(tokens):
         high = f.read().splitlines()
     with open('medium.txt', 'r') as f:
         medium = f.read().splitlines()
+    with open('good_pair.txt', 'r') as f:
+        pair = f.read().splitlines()
     lemmatizer = WordNetLemmatizer()
-    sentence = ' '.join(tokens)
-    dep = get_dep(sentence)
+    #sentence = ' '.join(tokens)
+    #dep = get_dep(sentence)
 
     #generate features
     pos = ['n', 'v', 'r', 'a']
@@ -99,8 +101,34 @@ def get_ugram_features(tokens):
                 ugram_features[i, 0, 2] = 1
                 ugram_features[i, 1, 2] = 1
                 break
+
+        if i > 0:
+            before_token = tokens[i-1]
+            for p1 in pos:
+                for p2 in pos:
+                    lemma = lemmatizer.lemmatize(token, pos = p1)
+                    lemma_before = lemmatizer.lemmatize(before_token, pos = p2)
+                    phrase = lemma_before + ' ' + lemma
+                    if phrase in pair:
+                        ugram_features[i, 0, 3] = 1
+                        ugram_features[i, 1, 3] = 1
+        if i < len(tokens)-1:
+            after_token = tokens[i+1]
+            for p1 in pos:
+                for p2 in pos:
+                    lemma = lemmatizer.lemmatize(token, pos = p1)
+                    lemma_after = lemmatizer.lemmatize(after_token, pos = p2)
+                    phrase = lemma + ' ' + lemma_after
+                    if phrase in pair:
+                        ugram_features[i, 0, 3] = 1
+                        ugram_features[i, 1, 3] = 1
+            
     
+    #trigger phrases
+
+
     #dependency head
+    '''
     for edge in dep:
         word = edge[0][0]
         dependent = edge[2][0]
@@ -136,6 +164,7 @@ def get_ugram_features(tokens):
             else:
                 ugram_features[token2index[dependent]][0][8] = 1
                 ugram_features[token2index[dependent]][1][8] = 1
+    '''
     
     #return np.concatenate([ugram_features[:,:,0], ugram_features[:,:,1]], axis=1)
     return ugram_features

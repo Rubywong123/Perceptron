@@ -45,8 +45,9 @@ class Perceptron:
             features = generate_feature_matrix(tokens)
             prediction = self.predict(features)
             self.update(features, triggers, prediction)
-            if step % 10 == 0:
+            if step % 1000 == 0:
                 print('=========step:', step)
+                print(self.weights)
 
 
     def eval(self, test_data):
