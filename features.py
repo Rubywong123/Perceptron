@@ -3,7 +3,12 @@ from nltk.parse.stanford import StanfordDependencyParser
 from nltk.stem import WordNetLemmatizer
 import numpy as np
 
+mapping = {'JJ':'a', 'JJR': 'a', 'JJS': 'a', 'NNS': 'n', 'NNPS': 'n', 
+            'RBR': 'r', 'RBS': 'r', 'VBD': 'v', 'VBG': 'v',
+            'VBN': 'v', 'VBP': 'v', 'VBZ': 'v', 'NN' : 'n',
+            'VB': 'v'
 
+}
 
 '''return a string of pos tags of their corresponding words. Containing punctuations.'''
 def get_pos(tokens):
@@ -61,7 +66,7 @@ def get_dep(sentence):
 return: (L, 4) matrix
 '''
 def get_ugram_features(tokens):
-    num_features = 5
+    num_features = 9
     num_classes = 2
     ugram_features = np.zeros((len(tokens), num_classes, num_features))
     ### load lists of triggers with very high/ high/ medium frequency.
@@ -96,24 +101,41 @@ def get_ugram_features(tokens):
                 break
     
     #dependency head
-    head_set = set()
-    dep_set = set()
     for edge in dep:
         word = edge[0][0]
         dependent = edge[2][0]
-        head_set.add(word)
-        dep_set.add(dependent)
-    for dep in dep_set:
-        if dep in head_set:
-            head_set.remove(dep)
-    for word in head_set:
+        word_pos = edge[0][1]
+        dep_pos = edge[2][1]
         if word in token2index:
-            ugram_features[token2index[word]][0][3] = 1
-            ugram_features[token2index[word]][1][3] = 1
-    for word in dep_set:
-        if word in token2index:
-            ugram_features[token2index[word]][0][4] = 1
-            ugram_features[token2index[word]][1][4] = 1
+            if word_pos in mapping:
+                if mapping[word_pos] == 'v':
+                    ugram_features[token2index[word]][0][3] = 1
+                    ugram_features[token2index[word]][1][3] = 1
+                elif mapping[word_pos] == 'n':
+                    ugram_features[token2index[word]][0][4] = 1
+                    ugram_features[token2index[word]][1][4] = 1
+                else:
+                    ugram_features[token2index[word]][0][5] = 1
+                    ugram_features[token2index[word]][1][5] = 1
+            else:
+                ugram_features[token2index[word]][0][5] = 1
+                ugram_features[token2index[word]][1][5] = 1
+
+        if dependent in token2index:
+            if dep_pos in mapping:
+
+                if mapping[dep_pos] == 'v':
+                    ugram_features[token2index[dependent]][0][6] = 1
+                    ugram_features[token2index[dependent]][1][6] = 1
+                elif mapping[dep_pos] == 'n':
+                    ugram_features[token2index[dependent]][0][7] = 1
+                    ugram_features[token2index[dependent]][1][7] = 1
+                else:
+                    ugram_features[token2index[dependent]][0][8] = 1
+                    ugram_features[token2index[dependent]][1][8] = 1
+            else:
+                ugram_features[token2index[dependent]][0][8] = 1
+                ugram_features[token2index[dependent]][1][8] = 1
     
     #return np.concatenate([ugram_features[:,:,0], ugram_features[:,:,1]], axis=1)
     return ugram_features

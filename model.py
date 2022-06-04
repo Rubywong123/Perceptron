@@ -30,10 +30,10 @@ class Perceptron:
         for i in range(len(features)):
             if triggers[i] != prediction[i]:
                 gold = triggers[i]
-                print('before update', self.weights)
+                #print('before update', self.weights)
                 self.weights[:, gold] = self.weights[:, gold] + features[i, gold, :]
                 self.weights[:, (1-gold)] = self.weights[:, (1-gold)] - features[i, (1-gold), :]
-                print('after update', self.weights)
+                #print('after update', self.weights)
         
         
 
@@ -72,10 +72,6 @@ class Perceptron:
         f1 = 2 * precision * recall / (precision + recall)
         print('precision: {}, recall: {}, f1: {}'.format(precision, recall, f1))
         
-        
-
-
-
         
 
 '''Structured Perceptron'''

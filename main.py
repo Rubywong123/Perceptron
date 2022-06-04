@@ -10,18 +10,14 @@ def main():
 
     example_features = generate_feature_matrix(train_data[0]['words'])
     n_classes = 2
-    n_features = example_features.shape[1]
+    n_features = 9
     model = Perceptron(n_classes, n_features)
 
-    model.train(train_data, valid_data)
+    model.train(train_data)
     print(model.weights)
 
     # test
     model.eval(test_data)
-
-
-
-
 
 
 
