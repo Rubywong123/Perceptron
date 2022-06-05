@@ -86,7 +86,7 @@ def pair_split(train_data):
                 pair_set.add((i.iloc[idx, 0], i.iloc[idx+1, 0]))
     good_pair = []
     for p in pair_set:
-        phrase = p.split()
+        phrase = p
         t_cnt = 0
         tot_cnt = 0
         for index, i in enumerate(train_data):
@@ -94,13 +94,13 @@ def pair_split(train_data):
                 if idx +1 in i.index and i.iloc[idx, 0] == phrase[0] and i.iloc[idx+1, 0] == phrase[1]:
                     #check trigger
                     tot_cnt += 1
-                    if i.iloc[idx, 1] == 1 and i.iloc[idx, 1] == 1:
+                    if i.iloc[idx, 1] == 1 and i.iloc[idx+1, 1] == 1:
                         t_cnt += 1
-        if t_cnt / tot_cnt > 0.7:
+        if t_cnt / tot_cnt >= 0.9:
             good_pair.append(p)
     with open('good_pair.txt', 'w') as f:
         for p in good_pair:
-            f.write(p+'\n')
+            f.write(p[0] + ' ' + p[1] +'\n')
 
 
 
@@ -113,4 +113,5 @@ if __name__ == '__main__':
     train_data = [pd.DataFrame(i) for i in read_data('train')]
     preprocessing(train_data)
     prob_split(train_data)
+    pair_split(train_data)
     

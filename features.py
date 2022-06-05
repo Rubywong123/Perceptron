@@ -22,7 +22,6 @@ def get_pos(tokens):
 '''
 NER
 return: a tree stands for NER labels.
-
 for word in ners:
     if type(word) == nltk.tree.Tree:
         [further operations]
@@ -36,11 +35,9 @@ def get_ner(tokens):
 
 '''
 dependency parsing
-
 return: list of dependencies(in the form of tuples)
 [((word1, pos1), relation, (word2, pos2)), ...]
 [head, relation, dependent]
-
 '''
 
 
@@ -61,12 +58,10 @@ def get_dep(sentence):
 '''4 ugram features
 1) word unigram, aims at using tokens that are highly related to being triggers.
 2) dependency parser, the head of a dependency tree tends to be a trigger.
-
-
 return: (L, 4) matrix
 '''
 def get_ugram_features(tokens):
-    num_features = 4
+    num_features = 3
     num_classes = 2
     ugram_features = np.zeros((len(tokens), num_classes, num_features))
     ### load lists of triggers with very high/ high/ medium frequency.
@@ -102,7 +97,7 @@ def get_ugram_features(tokens):
                 ugram_features[i, 1, 2] = 1
                 break
 
-        if i > 0:
+        '''if i > 0:
             before_token = tokens[i-1]
             for p1 in pos:
                 for p2 in pos:
@@ -122,9 +117,7 @@ def get_ugram_features(tokens):
                     if phrase in pair:
                         ugram_features[i, 0, 3] = 1
                         ugram_features[i, 1, 3] = 1
-            
-    
-    #trigger phrases
+        '''    
 
 
     #dependency head
@@ -148,10 +141,8 @@ def get_ugram_features(tokens):
             else:
                 ugram_features[token2index[word]][0][5] = 1
                 ugram_features[token2index[word]][1][5] = 1
-
         if dependent in token2index:
             if dep_pos in mapping:
-
                 if mapping[dep_pos] == 'v':
                     ugram_features[token2index[dependent]][0][6] = 1
                     ugram_features[token2index[dependent]][1][6] = 1
@@ -171,7 +162,6 @@ def get_ugram_features(tokens):
 
 '''bigram features
 1) 
-
 '''
 def get_bigram_features(tokens, triggers):
     pass

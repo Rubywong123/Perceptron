@@ -47,7 +47,7 @@ class Perceptron:
             self.update(features, triggers, prediction)
             if step % 1000 == 0:
                 print('=========step:', step)
-                print(self.weights)
+                #print(self.weights)
 
 
     def eval(self, test_data):
@@ -76,28 +76,6 @@ class Perceptron:
         
 
 '''Structured Perceptron'''
-
-class StructuredPerceptron:
-    '''Structured Perceptron'''
-    def __init__(self, nb_classes, nb_features):
-        '''Constructor'''
-        self.n_classes = nb_classes
-        self.n_features = nb_features
-        self.weights = [0] * nb_features
-
-    '''
-    predict(with decoding)
-    Return: (L, 2) matrix
-
-    '''
-    def predict(self, x):
-        pass
-
-    def update(self, x, y, prediction):
-        pass
-
-    def train(self, X, Y):
-        pass
 
 
 

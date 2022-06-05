@@ -1,4 +1,4 @@
-from model import StructuredPerceptron, Perceptron
+from model import Perceptron
 import numpy as np
 from util import read_data
 from features import generate_feature_matrix
@@ -10,7 +10,7 @@ def main():
 
     example_features = generate_feature_matrix(train_data[0]['words'])
     n_classes = 2
-    n_features = 4
+    n_features = 3
     model = Perceptron(n_classes, n_features)
 
     model.train(train_data)
